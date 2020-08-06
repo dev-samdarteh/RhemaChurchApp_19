@@ -1,0 +1,800 @@
+@*@model ChurchProData.Models.Membership.ChurchMember*@
+
+@model RHEMAChurchManager.Models.MemberProfileVM
+
+
+@{
+    @*ViewData["Title"] = "Church Member";*@
+    var photoPath = "~/images/" + (Model.oPersonalData.PhotoUrl ?? "df_user_p.png");
+}
+
+
+@*<div id="content-wrapper">*@
+@*<div class="jumbotron shadow-sm p-1 mb-2" style="width: 60%; margin: 10px auto 10px auto ; padding: 10px;   background-color:whitesmoke">*@
+
+<div id="divModalContainer" class="jumbotron-fluid shadow-none form-group justify-content-center"
+     style="width: 80%; margin: 0px auto 10px auto ; padding:0;  ">
+    <form id="currForm_Mem" method="post" enctype="multipart/form-data" asp-action="AddOrEdit_PersData" class=" form-group bg-transparent"
+          style="margin-top:0px; padding-left: 3px; padding-right:3px;   ">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="oPersonalData.Id" id="_hdnCurrId" />
+        <input type="hidden" asp-for="oPersonalData.AppGlobalOwnerId" />
+        <input type="hidden" asp-for="oPersonalData.ChurchBodyId" id="_hdnChuBodyId" />
+        <input type="hidden" asp-for="oPersonalData.Created" />
+        <input type="hidden" asp-for="oPersonalData.LastMod" />
+
+        <br />
+
+        <div class="justify-content-center" style="margin-left:auto; margin-right: auto; width: 75%;">
+            <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group mr-2" role="group" aria-label="First group">
+                    <button id="_btnViewAll" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="View all member data" style="width:50px">
+                        <i class="fas fa-binoculars fa-lg" style="color:black"></i>
+                    </button>
+                </div>
+                <div class="btn-group mr-2" role="group" aria-label="Second group">
+                    <button id="_btnPersData" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="Personal Data" style="width:50px">
+                        <i class="fas fa-user fa-lg"></i>
+                    </button>
+                    <button id="_btnGenChLife" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="General Church-life" style="width:50px">
+                        <i class="fas fa-church fa-lg"></i>
+                    </button>
+                    <button id="_btnLocAddr" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="Location | Personal Address" style="width:50px">
+                        <i class="fas fa-phone fa-lg"></i>
+                    </button>
+                    <button id="_btnPrimCont" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="Primary Contact Person" style="width:50px">
+                        <i class="fas fa-user-edit fa-lg"></i>
+                    </button>
+                    <button id="_btnFamRel" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="Family Relations" style="width:50px"
+                            onclick="AddEditCurrData_norm(0)">
+                        <i class="fas fa-users fa-lg"></i>
+                    </button>
+                </div>
+                @*<div class="btn-group" role="group" aria-label="Third group">
+                    <button id="_btnFamRel" type="button" class="btn btn-outline-info" data-toggle="tooltip" data-placement="bottom" title="Family Relations" style="width:50px">
+                        <i class="fas fa-users fa-lg"></i>
+                    </button>
+                </div>*@
+            </div>
+        </div>
+
+        <br />
+        <br />
+
+
+        <div id="_divPersData">
+            <hr style="width:100%; border: 1px inset #000;" />
+            <h6 class="breadcrumb breadcrumb-item active shadow-lg" style="background-color: darkgrey; color:white; "> Personal Data </h6>
+            <div class="form-row col-sm">
+                @if (Model.oPersonalData.Id > 0)
+                {
+                    <div class="form-group col-sm-4">
+                        <label asp-for="oPersonalData.Id" class="control-label">Member Id </label>
+                        <input asp-for="oPersonalData.Id" class="form-control" aria-describedby="btnGroupAddon" disabled />
+                        <span asp-validation-for="oPersonalData.Id" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="form-group col-sm-4">
+                    <label asp-for="oPersonalData.MemberGlobalId" class="control-label">Member Global Code</label>
+                    <input asp-for="oPersonalData.MemberGlobalId" class="form-control" aria-describedby="btnGroupAddon" />
+                    <span asp-validation-for="oPersonalData.MemberGlobalId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label asp-for="oPersonalData.MemberCode" class="control-label"></label>
+                    <input asp-for="oPersonalData.MemberCode" class="form-control" aria-describedby="btnGroupAddon" style=" background-color:lightyellow" />
+                    <span asp-validation-for="oPersonalData.MemberCode" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row ">
+                <div class="form-group  col-sm-8" style="border-right: 1px inset white">
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm">
+                            <label asp-for="oPersonalData.Title" class="control-label"></label>
+                            @*<input asp-for="oPersonalData.Title" class="form-control" aria-describedby="btnGroupAddon" />*@
+                            <select id="_Title" class="form-control" asp-for="oPersonalData.Title" asp-items="Model.lkpPersTitles"></select>
+                            <span asp-validation-for="oPersonalData.Title" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col">
+                            <label asp-for="oPersonalData.MemberTypeId" class="control-label"></label>
+                            <select id="_ChurchType" class="form-control" asp-for="oPersonalData.MemberTypeId" asp-items="Model.lkpChuMemTypes"></select>
+                            <span asp-validation-for="oPersonalData.MemberTypeId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm">
+                            <label asp-for="oPersonalData.FirstName" class="control-label"></label>
+                            <input asp-for="oPersonalData.FirstName" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oPersonalData.FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm">
+                            <label asp-for="oPersonalData.MiddleName" class="control-label"></label>
+                            <input asp-for="oPersonalData.MiddleName" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oPersonalData.MiddleName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm">
+                            <label asp-for="oPersonalData.LastName" class="control-label"></label>
+                            <input asp-for="oPersonalData.LastName" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oPersonalData.LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row col-sm-4" justify-content-center m-3" style="padding: 15px;">
+                    <div class="form-group  col-sm">
+                        <div class="card" style="min-width:25%; min-height:12rem; text-align:center">
+
+                            <div class="card-body text-center">
+                                <img class="card-img-top" src="@photoPath" asp-append-version="true" />
+                            </div>
+                            <label asp-for="oPersonalData.PhotoUrl" class="control-label"></label>
+
+                        </div>
+                        <div class="custom-file">
+                            <input type="hidden" asp-for="oPersonalData.PhotoUrl" id="_hdnCurrPhotoId" />
+                            @*<input type="hidden" class="form-control" id="imgFile"/>*@
+                            <input asp-for="MemPhotoFile" class="form-control custom-file-input" />
+                            <label class="custom-file-label" style="background-color:lightyellow">Choose member photo</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm">
+                    <label asp-for="oPersonalData.MaidenName" class="control-label"></label>
+                    <input asp-for="oPersonalData.MaidenName" class="form-control" aria-describedby="btnGroupAddon" />
+                    <span asp-validation-for="oPersonalData.MaidenName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm-3">
+                    <label asp-for="oPersonalData.Gender" class="control-label"></label>
+                    <select class="form-control" asp-for="oPersonalData.Gender" asp-items="Model.lkpGenderTypes"></select>
+                    <span asp-validation-for="oPersonalData.Gender" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-3"></div>
+                <div class="form-group col-sm-4">
+                    <label asp-for="oPersonalData.DateOfBirth" class="control-label"> Date of Birth</label>
+                    <input id="_DateOfBirth" asp-for="oPersonalData.DateOfBirth" class="form-control" aria-describedby="btnGroupAddon" />
+                    <span asp-validation-for="oPersonalData.DateOfBirth" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-2">
+                    <label asp-for="oPersonalData.DateOfBirth" class="control-label"> Age</label>
+                    <input id="_strMemberAge" asp-for="strMemberAge" class="form-control" aria-describedby="btnGroupAddon" disabled placeholder="" />
+                </div>
+            </div>
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm-3">
+                    <label asp-for="oPersonalData.MaritalStatus" class="control-label"></label>
+                    <select id="_MaritalStatus" class="form-control" asp-for="oPersonalData.MaritalStatus" asp-items="Model.lkpMaritalStatuses"></select>
+                    <span asp-validation-for="oPersonalData.MaritalStatus" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label asp-for="oPersonalData.MarriageType" class="control-label"></label>
+                    <select id="_MarriageType" class="form-control" asp-for="oPersonalData.MarriageType" asp-items="Model.lkpMaritalTypes"></select>
+                    <span asp-validation-for="oPersonalData.MarriageType" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-6" id="_divMarriageRegNo">
+                    <label asp-for="oPersonalData.MarriageRegNo" class="control-label"></label>
+                    <input id="_MarriageRegNo" asp-for="oPersonalData.MarriageRegNo" class="form-control" aria-describedby="btnGroupAddon" />
+                    <span asp-validation-for="oPersonalData.MarriageRegNo" class="text-danger"></span>
+                </div>
+            </div>
+            <br />
+            <hr style="width:100%; border: 1px inset #000;" />
+            <br />
+            <div class="form-row col-sm">
+                <div class="form-group col-sm-6">
+                    <label asp-for="oPersonalData.NationalityId" class="control-label"></label>
+                    <select id="_NationalityId" class="form-control" asp-for="oPersonalData.NationalityId" asp-items="Model.lkpCountries"></select>
+                    <span asp-validation-for="oPersonalData.NationalityId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label asp-for="oPersonalData.MotherTongueId" class="control-label"></label>
+                    <select id="_MotherTongueId" class="form-control" asp-for="oPersonalData.MotherTongueId" asp-items="Model.lkpLanguages"></select>
+                    <span asp-validation-for="oPersonalData.MotherTongueId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm-6">
+                    <label asp-for="oPersonalData.IDTypeId" class="control-label"></label>
+                    <select id="_IDTypeId" class="form-control" asp-for="oPersonalData.IDTypeId" asp-items="Model.lkpID_Types"></select>
+                    <span asp-validation-for="oPersonalData.IDTypeId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-6" id="_divNational_ID">
+                    <label asp-for="oPersonalData.NationalIDNum" class="control-label"></label>
+                    <input id="_NationalIDNum" asp-for="oPersonalData.NationalIDNum" class="form-control" placeholder="" /> 
+                    @*@if (Model.oPersonalData.IDTypeId != null)
+        {
+            <input id="_NationalIDNum" asp-for="oPersonalData.NationalIDNum" class="form-control" placeholder="" /> }
+        else
+        {
+            <input asp-for="oPersonalData.NationalIDNum" class="form-control" placeholder="" disabled />}*@
+                    <span asp-validation-for="oPersonalData.NationalIDNum" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm-6">
+                    <label asp-for="oPersonalData.Hometown" class="control-label"></label>
+                    <input asp-for="oPersonalData.Hometown" class="form-control" style=" background-color:lightyellow" />
+                    <span asp-validation-for="oPersonalData.Hometown" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label asp-for="oPersonalData.HometownRegionId" class="control-label"></label>
+                    <select id="_HometownRegionId" class="form-control" asp-for="oPersonalData.HometownRegionId" asp-items="Model.lkpCtryRegions"></select>
+                    <span asp-validation-for="oPersonalData.HometownRegionId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row col-sm">
+                @{
+                    if (Model.oPersonalData.Id == 0) //new member
+                    {
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLangSpkn.LanguageSpokenId" class="control-label">Primary Language Spoken</label>
+                            <select id="_PrimLanguageSpokenId" class="form-control" asp-for="oMemberLangSpkn.LanguageSpokenId" asp-items="Model.lkpLanguages"></select>
+                            <span asp-validation-for="oMemberLangSpkn.LanguageSpokenId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLangSpkn.ProficiencyLevel" class="control-label"></label>
+                            <select id="_PrimLangProfLevel" class="form-control" asp-for="oMemberLangSpkn.ProficiencyLevel" asp-items="Model.lkpLangProfLevels"></select>
+                            <span asp-validation-for="oMemberLangSpkn.ProficiencyLevel" class="text-danger"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLangSpkn.LanguageSpokenId" class="control-label">Primary Language Spoken</label>
+                            <input asp-for="strPrimLang" class="form-control" disabled />
+                            <span asp-validation-for="oMemberLangSpkn.LanguageSpokenId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLangSpkn.ProficiencyLevel" class="control-label"></label>
+                            <input asp-for="strPrimLang" class="form-control" disabled />
+                            <span asp-validation-for="oMemberLangSpkn.ProficiencyLevel" class="text-danger"></span>
+                        </div>
+                    }
+                }
+
+                <div class="form-group col-sm-4">
+                    <label asp-for="oPersonalData.EducationLevelId" class="control-label"></label>
+                    <select id="_EducationLevelId" class="form-control" asp-for="oPersonalData.EducationLevelId" asp-items="Model.lkpEduLevels"></select>
+                    <span asp-validation-for="oPersonalData.EducationLevelId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-row col-sm">
+                <div class="form-group col-sm">
+                    <label asp-for="oPersonalData.Hobbies" class="control-label"></label>
+                    <input asp-for="oPersonalData.Hobbies" class="form-control" />
+                    <span asp-validation-for="oPersonalData.Hobbies" class="text-danger"></span>
+                </div>
+            </div>
+
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm-4">
+                    <label asp-for="oPersonalData.AffiliateStatus" class="control-label"></label>
+                    <select id="_AffiliateStatus" class="form-control" asp-for="oPersonalData.AffiliateStatus" asp-items="Model.lkpAffiliationStatuses"></select>
+                    <span asp-validation-for="oPersonalData.AffiliateStatus" class="text-danger"></span>
+                </div>
+                <div class="form-group col-sm-4"></div>
+                <div class="form-group col-sm-4" id="_divIsActivated">
+                    <label asp-for="oPersonalData.IsActivated" class="control-label">&nbsp;</label>
+                    <label class="chk_container">
+                        <span> Membership Activated ?</span>
+                        <input id="chk_IsActivated" type="checkbox" asp-for="oPersonalData.IsActivated" />
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+
+
+            <div class="form-row col-sm">
+                <div class="form-group col-sm">
+                    <label asp-for="oPersonalData.OtherInfo" class="control-label"></label>
+                    <textarea asp-for="oPersonalData.OtherInfo" class="form-control" id="OtherInfo" row="6" cols="40"></textarea>
+                    <span asp-validation-for="oPersonalData.OtherInfo" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="_divGenChurchLife">
+            <hr style="width:100%; border: 1px inset #000;" />
+            <h6 class="breadcrumb breadcrumb-item active shadow-lg" style="background-color: darkgrey; color:white; "> General Churchlife </h6>
+            <div class="form-row col-sm">
+                @{
+                    if (Model.oPersonalData.Id == 0) //new member
+                    {
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberStatus.ChurchMemStatusId" class="control-label"></label>
+                            <select id="_ChurchMemStatusId" class="form-control" asp-for="oMemberStatus.ChurchMemStatusId" asp-items="Model.lkpChurchMemStatuses"></select>
+                            <span asp-validation-for="oMemberStatus.ChurchMemStatusId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberRank.ChurchRankId" class="control-label"></label>
+                            <select id="_ChurchRankId" class="form-control" asp-for="oMemberRank.ChurchRankId" asp-items="Model.lkpChuMemRanks"></select>
+                            <span asp-validation-for="oMemberRank.ChurchRankId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberPos.ChurchPositionId" class="control-label"></label>
+                            <select id="_ChurchPositionId" class="form-control" asp-for="oMemberPos.ChurchPositionId" asp-items="Model.lkpChuPositions"></select>
+                            <span asp-validation-for="oMemberPos.ChurchPositionId" class="text-danger"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberStatus.ChurchMemStatusId" class="control-label">Membership Status</label>
+                            <input asp-for="strMemberStat" class="form-control" disabled />
+                            <span asp-validation-for="oMemberStatus.ChurchMemStatusId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="RankId" class="control-label">Church Rank</label>
+                            <input asp-for="strChurchRank" class="form-control" disabled />
+                            <span asp-validation-for="RankId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberPos.ChurchPositionId" class="control-label">Church Position</label>
+                            <input asp-for="strChurchPos" class="form-control" disabled />
+                            <span asp-validation-for="oMemberPos.ChurchPositionId" class="text-danger"></span>
+                        </div>
+
+                    }
+                }
+            </div>
+
+            @{
+                if (Model.oPersonalData.Id == 0) //new member
+                {
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-4" id="_divEnrolled">
+                            <label asp-for="oMemberChurchlife.Joined" class="control-label"></label>
+                            <input asp-for="oMemberChurchlife.Joined" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberChurchlife.Joined" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm">
+                            <label asp-for="oMemberChurchlife.EnrollReason" class="control-label"></label>
+                            <input asp-for="oMemberChurchlife.EnrollReason" class="form-control" aria-describedby="btnGroupAddon" placeholder="" />
+                            <span asp-validation-for="oMemberChurchlife.EnrollReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-3">
+                            <label asp-for="oMemberChurchlife.IsCurrentMember" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Current Member </span>
+                                <input id="chk_IsCurrentMem" type="checkbox" asp-for="oMemberChurchlife.IsCurrentMember" checked />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-1"></div>
+                        <div class="form-group col-sm-4" id="_divIsPioneer">
+                            <label asp-for="oMemberChurchlife.IsPioneer" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Pioneer /Founding member ?</span>
+                                <input id="chk_IsPioneer" type="checkbox" asp-for="oMemberChurchlife.IsPioneer" />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-3" id="_divIsDeceased">
+                            <label asp-for="oMemberChurchlife.IsDeceased" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Deceased (Passed on) ?</span>
+                                <input id="chk_IsDeceased" type="checkbox" asp-for="oMemberChurchlife.IsDeceased" disabled />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-1"></div>
+                    </div>
+                    <div class="form-row col-sm" id="_divDepart" hidden>
+                        <div class="form-group col-sm-4" id="_divDeparted">
+                            <label asp-for="oMemberChurchlife.Departed" class="control-label"></label>
+                            <input id="_Departed" asp-for="oMemberChurchlife.Departed" class="form-control" aria-describedby="btnGroupAddon" placeholder="" />
+                            <span asp-validation-for="oMemberChurchlife.Departed" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm">
+                            <label asp-for="oMemberChurchlife.DepartReason" class="control-label"></label>
+                            <input id="_DepartReason" asp-for="oMemberChurchlife.DepartReason" class="form-control" />
+                            <span asp-validation-for="oMemberChurchlife.DepartReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-2">
+                            <label asp-for="oMemberChurchlife.IsMemBaptized" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Baptised ? </span>
+                                <input id="chk_IsMemBaptized" type="checkbox" asp-for="oMemberChurchlife.IsMemBaptized" />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-2"></div>
+                        @if (Model.IsMemConfirmAllowed == false)
+                        {
+                            <div class="form-group col-sm-2" id="_divIsMemConfirmed">
+                                <label asp-for="oMemberChurchlife.IsMemConfirmed" class="control-label">&nbsp;</label>
+                                <label class="chk_container">
+                                    <span> Confirmed ?</span>
+                                    <input id="chk_IsMemConfirmed" type="checkbox" asp-for="oMemberChurchlife.IsMemConfirmed" />
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="form-group col-sm-2"></div>
+                        }
+
+                        <div class="form-group col-sm-3" id="_divIsMemCommunicant">
+                            <label asp-for="oMemberChurchlife.IsMemCommunicant" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Communicant ?</span>
+                                <input id="chk_IsMemCommunicant" type="checkbox" asp-for="oMemberChurchlife.IsMemCommunicant" />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-1"></div>
+                    </div>
+                    <div class="form-row col-sm" id="_divNonCommReason">
+                        <div class="form-group col-sm">
+                            <label asp-for="oMemberChurchlife.NonCommReason" class="control-label"></label>
+                            <input id="_NonCommReason" asp-for="oMemberChurchlife.NonCommReason" class="form-control" />
+                            <span asp-validation-for="oMemberChurchlife.NonCommReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label asp-for="oMemberChurchlife.ChurchBodyServiceId" class="control-label">Preferred Weekly Service</label>
+                        <select id="_ChurchPositionId" class="form-control" asp-for="oMemberChurchlife.ChurchBodyServiceId" asp-items="Model.lkpChurchServices"></select>
+                        <span asp-validation-for="oMemberChurchlife.ChurchBodyServiceId" class="text-danger"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-row col-sm" id="_divEnrolledDisable">
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberChurchlife.Joined" class="control-label"></label>
+                            <input asp-for="strJoined" class="form-control" disabled />
+                            <span asp-validation-for="oMemberChurchlife.Joined" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm">
+                            <label asp-for="oMemberChurchlife.EnrollReason" class="control-label"></label>
+                            <input asp-for="oMemberChurchlife.EnrollReason" class="form-control" disabled />
+                            <span asp-validation-for="oMemberChurchlife.EnrollReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberChurchlife.IsCurrentMember" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Current Member </span>
+                                <input id="chk_IsCurrentMem" type="checkbox" asp-for="oMemberChurchlife.IsCurrentMember" disabled />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-4" id="_divIsPioneerDisable">
+                            <label asp-for="oMemberChurchlife.IsPioneer" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Pioneer /Founding member ?</span>
+                                <input id="chk_IsPioneer" type="checkbox" asp-for="oMemberChurchlife.IsPioneer" disabled />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-4" id="_divIsDeceasedDisable">
+                            <label asp-for="oMemberChurchlife.IsDeceased" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Deceased ?</span>
+                                <input id="chk_IsDeceased" type="checkbox" asp-for="oMemberChurchlife.IsDeceased" disabled />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+
+                    </div>
+                    <div class="form-row col-sm" id="_divDepartDisable">
+                        <div class="form-group col-sm-4" id="_divDeparted">
+                            <label asp-for="oMemberChurchlife.Departed" class="control-label"></label>
+                            <input id="_DepartedDisable" asp-for="strDeparted" class="form-control" disabled />
+                            <span asp-validation-for="oMemberChurchlife.Departed" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm">
+                            <label asp-for="oMemberChurchlife.DepartReason" class="control-label"></label>
+                            <input id="_DepartReasonDisable" asp-for="oMemberChurchlife.DepartReason" class="form-control" disabled />
+                            <span asp-validation-for="oMemberChurchlife.DepartReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberChurchlife.IsMemBaptized" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Baptized ? </span>
+                                <input id="chk_IsMemBaptizedDisable" type="checkbox" asp-for="oMemberChurchlife.IsMemBaptized" disabled />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        @if (Model.IsMemConfirmAllowed)
+                        {
+                            <div class="form-group col-sm-4" id="_divIsMemConfirmed">
+                                <label asp-for="oMemberChurchlife.IsMemConfirmed" class="control-label">&nbsp;</label>
+                                <label class="chk_container">
+                                    <span> Confirmed ?</span>
+                                    <input id="chk_IsMemConfirmedDisable" type="checkbox" asp-for="oMemberChurchlife.IsMemConfirmed" disabled />
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        }
+
+                        <div class="form-group col-sm-4" id="_divIsMemCommunicant">
+                            <label asp-for="oMemberChurchlife.IsMemCommunicant" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Communicant ?</span>
+                                <input id="chk_IsMemCommunicantDisable" type="checkbox" asp-for="oMemberChurchlife.IsMemCommunicant" disabled />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm" id="_divNonCommReason">
+                        <div class="form-group col-sm">
+                            <label asp-for="oMemberChurchlife.NonCommReason" class="control-label"></label>
+                            <input id="_NonCommReason" asp-for="oMemberChurchlife.NonCommReason" class="form-control" disabled />
+                            <span asp-validation-for="oMemberChurchlife.NonCommReason" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+
+        <div id="_divMemLocAddr">
+            <hr style="width:100%; border: 1px inset #000;" />
+            <input type="hidden" asp-for="oPersonalData.ContactInfoId" id="#_hdnCurrContactId" />
+            @{
+                if (Model.oPersonalData.Id == 0) //new member
+                {
+                    <h6 class="breadcrumb breadcrumb-item active shadow-lg" style="background-color: deepskyblue; color:white; ">Location | Personal Address</h6>
+                    <input type="hidden" asp-for="oMemberLocAddr.Id" />
+                    <input type="hidden" asp-for="oMemberLocAddr.ChurchBodyId" id="_hdnContDtlChuBodyId" />
+                    <input type="hidden" asp-for="oMemberLocAddr.Created" />
+                    <input type="hidden" asp-for="oMemberLocAddr.LastMod" />
+
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-6">
+                            <label asp-for="oMemberLocAddr.ResidenceAddress" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.ResidenceAddress" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.ResidenceAddress" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label asp-for="oMemberLocAddr.Location" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.Location" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.Location" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-4" id="_divIsActivated">
+                            <label asp-for="oMemberLocAddr.ResAddrSameAsPostAddr" class="control-label">&nbsp;</label>
+                            <label class="chk_container">
+                                <span> Same as Residential Address ?</span>
+                                <input id="chk_ResAddrSameAsPostAddr_LocAddr" type="checkbox" asp-for="oMemberLocAddr.ResAddrSameAsPostAddr" />
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="form-group col-sm-8" >
+                            <label asp-for="oMemberLocAddr.PostalAddress" class="control-label"></label>
+                            <input id="_PostalAddress_LocAddr" asp-for="oMemberLocAddr.PostalAddress" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.PostalAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-6">
+                            <label asp-for="oMemberLocAddr.City" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.City" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.City" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label asp-for="oMemberLocAddr.DigitalAddress" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.DigitalAddress" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.DigitalAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-6">
+                            <label asp-for="oMemberLocAddr.CountryId" class="control-label"></label>
+                            <select id="_CountryId_LocAddr" class="form-control" asp-for="oMemberLocAddr.CountryId" asp-items="Model.lkpCountries"></select>
+                            <span asp-validation-for="oMemberLocAddr.CountryId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label asp-for="oMemberLocAddr.RegionId" class="control-label"></label>
+                            <select id="_RegionId_LocAddr" class="form-control" asp-for="oMemberLocAddr.RegionId" asp-items="Model.lkpCtryRegions"></select>
+                            <span asp-validation-for="oMemberLocAddr.RegionId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLocAddr.Telephone" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.Telephone" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.Telephone" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLocAddr.MobilePhone1" class="control-label"></label>
+                            <input id="_MobilePhone1" asp-for="oMemberLocAddr.MobilePhone1" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.MobilePhone1" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberLocAddr.MobilePhone2" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.MobilePhone2" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.MobilePhone2" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col">
+                            <label asp-for="oMemberLocAddr.Email" class="control-label"></label>
+                            <input asp-for="oMemberLocAddr.Email" class="form-control" aria-describedby="btnGroupAddon" />
+                            <span asp-validation-for="oMemberLocAddr.Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row col-sm">
+                        <div class="form-group col">
+                            <label asp-for="oMemberLocAddr.Website" class="control-label">Website /Blog</label>
+                            <input asp-for="oMemberLocAddr.Website" class="form-control" aria-describedby="btnGroupAddon" placeholder="" />
+                            <span asp-validation-for="oMemberLocAddr.Website" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+
+
+
+
+
+        <div id="_divMemContact">
+            <hr style="width:100%; border: 1px inset #000;" />
+            @{
+                if (Model.oPersonalData.Id == 0) //new member
+                {
+                    <h6 class="breadcrumb breadcrumb-item active shadow-lg" style="background-color: darkgrey; color:white; "> Primary Contact </h6>
+                    <input type="hidden" asp-for="oMemberContact.Id" id="#_hdnCurrId_MemContact" />
+                    <input type="hidden" asp-for="oMemberContact.ChurchMemberId" />
+                    <input type="hidden" asp-for="oMemberContact.ChurchBodyId" id="_hdnContDtlChuBodyId" />
+                    <input type="hidden" asp-for="oMemberContact.Created" />
+                    <input type="hidden" asp-for="oMemberContact.LastMod" />
+                    <br />
+                    <input type="hidden" asp-for="oMemberContactInfo.Id" id="#_hdnCurrPrimContId" />
+                    <input type="hidden" asp-for="oMemberContactInfo.ChurchBodyId" id="_hdnContDtlChuBodyId" />
+                    <input type="hidden" asp-for="oMemberContactInfo.Created" />
+                    <input type="hidden" asp-for="oMemberContactInfo.LastMod" />
+
+                    <div class="form-group col-sm-6" id="_divChurchFellow">
+                        <label asp-for="oMemberContact.ChurchFellow" class="control-label">&nbsp;</label>
+                        <label class="chk_container">
+                            <span> Church fellow ?</span>
+                            <input id="chk_ChurchFellow" type="checkbox" asp-for="oMemberContact.ChurchFellow" checked/>
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+                    <br />
+                    <div class="form-row col-sm" id="_divInternalContactId">
+                        <div class="form-group col-sm-8">
+                            <label asp-for="oMemberContact.InternalContactId" class="control-label"></label>
+                            <select id="_InternalContactId" class="form-control" asp-for="oMemberContact.InternalContactId" asp-items="Model.lkpChurchMembers_Local"></select>
+                            <span asp-validation-for="oMemberContact.InternalContactId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label asp-for="oMemberContact.RelationshipId" class="control-label"></label>
+                            <select id="_RelationshipId" class="form-control" asp-for="oMemberContact.RelationshipId" asp-items="Model.lkpRelationshipTypes"></select>
+                            <span asp-validation-for="oMemberContact.RelationshipId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @*<div class="form-row col-sm">
+                    <div class="form-group col-sm-8">
+                        <label asp-for="oMemberContact.ChurchAssociateId" class="control-label"></label>
+                        <select id="_ChurchAssociateId" class="form-control" asp-for="oMemberContact.ChurchAssociateId" asp-items="Model.lkpChurchAssociates"></select>
+                        <span asp-validation-for="oMemberContact.ChurchAssociateId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-row col-sm">
+
+                </div>
+                    *@
+                    <br />
+                    <hr style="width:100%; border:1px inset white;" />
+                    <div id="_divMemberContactInfo">
+                        <div class="form-row col-sm">
+                            <div class="form-group col-sm-6">
+                                <label asp-for="oMemberContactInfo.ResidenceAddress" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.ResidenceAddress" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.ResidenceAddress" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label asp-for="oMemberContactInfo.Location" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.Location" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.Location" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row col-sm">
+                            <div class="form-group col-sm-4" id="_divIsActivated">
+                                <label asp-for="oMemberContactInfo.ResAddrSameAsPostAddr" class="control-label">&nbsp;</label>
+                                <label class="chk_container">
+                                    <span> Same as Residential Address ?</span>
+                                    <input id="chk_ResAddrSameAsPostAddr_MemPrimCont" type="checkbox" asp-for="oMemberContactInfo.ResAddrSameAsPostAddr" />
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="form-group col-sm-8">
+                                <label asp-for="oMemberContactInfo.PostalAddress" class="control-label"></label>
+                                <input id="_PostalAddress_MemPrimCont" asp-for="oMemberContactInfo.PostalAddress" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.PostalAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row col-sm">
+                            <div class="form-group col-sm-6">
+                                <label asp-for="oMemberContactInfo.City" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.City" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.City" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label asp-for="oMemberContactInfo.DigitalAddress" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.DigitalAddress" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.DigitalAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row col-sm">
+                            <div class="form-group col-sm-6">
+                                <label asp-for="oMemberContactInfo.CountryId" class="control-label"></label>
+                                <select id="_CountryId_MemPrimCont" class="form-control" asp-for="oMemberContactInfo.CountryId" asp-items="Model.lkpCountries"></select>
+                                <span asp-validation-for="oMemberContactInfo.CountryId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label asp-for="oMemberContactInfo.RegionId" class="control-label"></label>
+                                <select id="_RegionId_MemPrimCont" class="form-control" asp-for="oMemberContactInfo.RegionId" asp-items="Model.lkpCtryRegions"></select>
+                                <span asp-validation-for="oMemberContactInfo.RegionId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row col-sm">
+                            <div class="form-group col-sm-4">
+                                <label asp-for="oMemberContactInfo.Telephone" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.Telephone" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.Telephone" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <label asp-for="oMemberContactInfo.MobilePhone1" class="control-label"></label>
+                                <input id="_MobilePhone1" asp-for="oMemberContactInfo.MobilePhone1" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.MobilePhone1" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-sm-4">
+                                <label asp-for="oMemberContactInfo.MobilePhone2" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.MobilePhone2" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.MobilePhone2" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row col-sm">
+                            <div class="form-group col">
+                                <label asp-for="oMemberContactInfo.Email" class="control-label"></label>
+                                <input asp-for="oMemberContactInfo.Email" class="form-control" aria-describedby="btnGroupAddon" />
+                                <span asp-validation-for="oMemberContactInfo.Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row col-sm">
+                            <div class="form-group col">
+                                <label asp-for="oMemberContactInfo.Website" class="control-label">Website /Blog</label>
+                                <input asp-for="oMemberContactInfo.Website" class="form-control" aria-describedby="btnGroupAddon" placeholder="" />
+                                <span asp-validation-for="oMemberContactInfo.Website" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <br />
+    </form>
+</div>
+
+
